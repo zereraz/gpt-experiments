@@ -1,9 +1,11 @@
 import torch.nn.functional as F
 import torch
+from tqdm import tqdm
 
 
 def train(model, dataloader, epochs, device="mps"):
     model = model.to(device)
+    model.train()
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
 
     total_params = sum(p.numel() for p in model.parameters())
@@ -12,7 +14,7 @@ def train(model, dataloader, epochs, device="mps"):
     for epoch in range(epochs):
         total_loss = 0
 
-        for i, batch in enumerate(dataloader):
+        for i, batch in enumerate(tqdm(dataloader, desc=f"Epoch {epoch + 1}/{epochs}")):
             batch = batch.to(device)
             x, y = batch[:, :-1], batch[:, 1:]
 
@@ -54,16 +56,20 @@ def generate(
     max_tokens: int = 50,
     temperature: float = 1.0,
     device: str = "mps",
+    max_seq_len: int = 128,
 ):
     model.eval()
     tokens = tokenizer.encode(prompt)
 
+    # Handle empty prompt - start with a random or special token
+    if not tokens:
+        tokens = [0]  # Start with first token in vocab
+
     with torch.no_grad():
         for _ in range(max_tokens):
-            x = torch.tensor([tokens[-128:]], device=device)
+            x = torch.tensor([tokens[-max_seq_len:]], dtype=torch.long, device=device)
             logits = model(x)[0, -1, :] / temperature
             probs = torch.softmax(logits, dim=-1)
             next_token = torch.multinomial(probs, 1).item()
             tokens.append(next_token)
-
     return tokenizer.decode(tokens)

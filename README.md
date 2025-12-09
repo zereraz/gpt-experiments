@@ -15,6 +15,16 @@ Learning to build an LLM from scratch using just PyTorch.
 uv sync --extra dev
 ```
 
+## Training Data
+
+Download a text corpus for training:
+
+```bash
+curl -o corpus.txt https://www.gutenberg.org/files/1661/1661-0.txt
+```
+
+This downloads "The Adventures of Sherlock Holmes" from Project Gutenberg. You can use any plain text file as `corpus.txt`.
+
 ## Development
 
 ```bash

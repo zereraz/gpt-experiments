@@ -7,9 +7,17 @@ from torch.utils.data import DataLoader
 
 TOKENIZER_PATH = "tokenizer.json"
 MODEL_PATH = "model.pt"
+CORPUS_PATH = "corpus.txt"
 
-with open("/usr/share/dict/words", "r") as f:
-    text = f.read()
+# Use real text for training (download with: curl -o corpus.txt https://www.gutenberg.org/files/1661/1661-0.txt)
+if os.path.exists(CORPUS_PATH):
+    with open(CORPUS_PATH, "r") as f:
+        text = f.read()
+else:
+    raise FileNotFoundError(
+        f"Corpus file '{CORPUS_PATH}' not found. Download one with:\n"
+        "  curl -o corpus.txt https://www.gutenberg.org/files/1661/1661-0.txt"
+    )
 
 # Load or train tokenizer
 tokenizer = BPETokenizer(vocab_size=1000)
@@ -33,5 +41,5 @@ else:
 
 # Generate text
 print("\n[generate] Sampling from model:")
-output = generate(model, tokenizer, "hello", max_tokens=50)
+output = generate(model, tokenizer, "", max_tokens=50)
 print(output)
